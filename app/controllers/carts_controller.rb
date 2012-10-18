@@ -1,4 +1,6 @@
 class CartsController < ApplicationController
+ skip_before_filter :authorize, :only => [:create, :update, :delete]
+
   # GET /carts
   # GET /carts.json
   def index
@@ -10,17 +12,21 @@ class CartsController < ApplicationController
     end
   end
 
-  # GET /carts/1
-  # GET /carts/1.json
+ # GET /carts/1
+ # GET /carts/1.xml
   def show
-    @cart = Cart.find(params[:id])
-
-    respond_to do |format|
-      format.html # show.html.erb
-      format.json { render json: @cart }
+    begin
+      @cart = Cart.find(params[:id])
+    rescue ActiveRecord::RecordNotFound
+      logger.error "Attempt to access invalid cart #{params[:id]}"
+      redirect_to store_url, :notice => 'Invalid cart'
+    else
+      respond_to do |format|
+        format.html # show.html.erb
+        format.xml { render :xml => @cart }
+      end
     end
   end
-
   # GET /carts/new
   # GET /carts/new.json
   def new
@@ -74,10 +80,14 @@ class CartsController < ApplicationController
   def destroy
     @cart = Cart.find(params[:id])
     @cart.destroy
+    session[:cart_id] = nil
+
 
     respond_to do |format|
-      format.html { redirect_to carts_url }
-      format.json { head :no_content }
+    format.html { redirect_to(store_url,:notice => 'Your cart is currently empty' ) }
+    format.html { redirect_to(store_url) }
+
     end
   end
 end
+  

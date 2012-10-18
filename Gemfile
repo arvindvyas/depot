@@ -33,6 +33,7 @@ gem 'jquery-rails'
 
 # Deploy with Capistrano
 # gem 'capistrano'
+gem 'will_paginate' , '>= 3.0.pre'
 
 # To use debugger
 # gem 'debugger'
